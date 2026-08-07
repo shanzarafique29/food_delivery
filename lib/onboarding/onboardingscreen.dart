@@ -1,150 +1,165 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
+import 'package:get/get.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingscreenState();
-}
-
-class _OnboardingscreenState extends State<OnboardingScreen> {
-  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            width: size.width,
-            height: size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [AppColor.primary, AppColor.text4],
-              ),
-            ),
-            child: Opacity(
-              opacity: 0.1,
-              child: Image.asset(
-                'assets/images/applogo.png',
-                fit: BoxFit.cover,
-              ),
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColor.text4, AppColor.primary],
           ),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
 
-          Positioned(
-            bottom: size.height * 0.19,
-            right: -size.width * 0.0,
-            child: Stack(
-              children: [
-                Opacity(
-                  opacity: 0.9,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Container(
+                  padding: EdgeInsets.all(14.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
                   child: Image.asset(
-                    'assets/images/ToyFaces_Tansparent_BG_29.png',
-                    height: size.height * 0.34,
+                    'assets/images/applogo.png',
+                    height: 35,
+                    width: 35,
                     fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
                   ),
                 ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: size.height * 0.10, // sirf bottom 10% cover kare
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,// upar transparent
-                          AppColor.primary, // niche halka blur/soft shadow
-                        ],
+              ),
+
+              SizedBox(height: 28),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  "Food for\nEveryone",
+                  style: GoogleSansRoundedStyles.bold(
+                    size: 40,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 12),
+
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      right: -size.width * 0.02,
+                      bottom: size.height * 0.05,
+                        child: _FadedCharacter(
+                          imagePath: 'assets/images/ToyFaces_Tansparent_BG_29.png',
+                          height: size.height * 0.35,
+                        ),  
+                    ),
+                    Positioned(
+                      left: -size.width * 0.02,
+                      bottom: size.height * 0.05,
+                      child: _FadedCharacter(
+                        imagePath: 'assets/images/ToyFaces_Tansparent_BG_49.png',
+                        height: size.height * 0.42,
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-
-          Positioned(
-            bottom: size.height * 0.19,
-            left: -size.width * 0.0,
-            child: Image.asset(
-              'assets/images/ToyFaces_Tansparent_BG_49.png',
-              height: size.height * 0.42,
-              fit: BoxFit.contain,
-            ),
-          ),
-
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 30.0,
-                vertical: 20.0,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(14.0),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 40, left: 30, right: 30),
+                child: GestureDetector(
+                  onTap: () {
+                 Get.to( () =>  AuthScreen());
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: Image.asset(
-                      'assets/images/applogo.png',
-                      height: 35,
-                      width: 35,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-
-                  SizedBox(height: 24.0),
-
-                  Text(
-                    "Food for\nEveryone",
-                    style: GoogleSansRoundedStyles.bold(
-                      size: 40,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      height: 1.0,
-                    ),
-                  ),
-
-                  Spacer(),
-
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 40),
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Get started",
-                          style: GoogleSansRoundedStyles.bold(
-                            size: 18,
-                            color: const Color(0xFFFE4A1F),
-                            fontWeight: FontWeight.bold,
-                          ),
+                    child: Center(
+                      child: Text(
+                        "Get started",
+                        style: GoogleSansRoundedStyles.bold(
+                          size: 18,
+                          color: AppColor.primary,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+ SizedBox(height: 24),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+class _FadedCharacter extends StatelessWidget {
+  final String imagePath;
+  final double height;
+  final double fadeStart; 
+  final double fadeEnd;   
+ 
+  const _FadedCharacter({
+    required this.imagePath,
+    required this.height,
+    this.fadeStart = 0.65, 
+    this.fadeEnd = 1.0,   
+  });
+ 
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const [
+            Colors.white,
+            Colors.white,
+            Colors.transparent, 
+          ],
+          stops: [0.0, fadeStart, fadeEnd],
+        ).createShader(bounds);
+      },
+      child: Image.asset(
+        imagePath,
+        height: height,
+        fit: BoxFit.contain,
       ),
     );
   }
