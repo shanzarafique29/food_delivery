@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_delivery/onboarding/onboardingscreen.dart';
 import 'package:get/get.dart';
 import 'package:food_delivery/features/dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -14,7 +16,6 @@ class AuthController extends GetxController {
   final passwordController = TextEditingController();
 
   void switchToLogin() => isLogin.value = true;
-
   void switchToSignup() => isLogin.value = false;
 
   Future<void> submit() async {
@@ -22,37 +23,44 @@ class AuthController extends GetxController {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Email aur password dalna zaroori hai');
+      Get.snackbar('Error', 'Enter email and password');
       return;
     }
     if (!isLogin.value && nameController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Naam dalna zaroori hai');
+      Get.snackbar('Error', 'Enter name');
       return;
     }
 
     isLoading.value = true;
     try {
       if (isLogin.value) {
+  
         await _auth.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
-        Get.offAll(() =>  Dashboard());
+
+  
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isOnboardingDone', true);
+
+        Get.offAll(() => Dashboard());
       } else {
+        
         final credential = await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
         await credential.user?.updateDisplayName(nameController.text.trim());
-        await _auth.signOut();
 
+        await _auth.signOut(); 
         passwordController.clear();
         isLogin.value = true;
 
-        Get.snackbar('Success', 'Account ban gaya, ab login karen');
+        Get.snackbar('Success', 'Account created successfully');
       }
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', e.message ?? 'Kuch ghalat ho gaya');
+      Get.snackbar('Error', e.message ?? 'Something went wrong');
     } finally {
       isLoading.value = false;
     }
@@ -61,19 +69,25 @@ class AuthController extends GetxController {
   Future<void> resetPassword() async {
     final email = emailController.text.trim();
     if (email.isEmpty) {
-      Get.snackbar('Error', 'Pehle email dalen');
+      Get.snackbar('Error', 'Enter email');
       return;
     }
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      Get.snackbar('Success', 'Password reset link email par bhej di gayi hai');
+      Get.snackbar('Success', 'Password reset email sent successfully');
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', e.message ?? 'Kuch ghalat ho gaya');
+      Get.snackbar('Error', e.message ?? 'Something went wrong');
     }
   }
 
   Future<void> logout() async {
     await _auth.signOut();
+
+  
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isOnboardingDone', false);
+
+    Get.offAll(() => OnboardingScreen());
   }
 
   @override

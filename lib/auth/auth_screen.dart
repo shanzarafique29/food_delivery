@@ -91,7 +91,7 @@ class AuthScreen extends StatelessWidget {
                            SizedBox(height: 14),
                           GestureDetector(
                             onTap: () {
-                              // TODO: forgot password flow
+                              
                             },
                             child: Text(
                               'Forgot passcode?',
