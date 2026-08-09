@@ -3,9 +3,16 @@ import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isOnboardingDone', true);
+    Get.offAll(() => AuthScreen());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +21,7 @@ class OnboardingScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -28,7 +35,7 @@ class OnboardingScreen extends StatelessWidget {
               SizedBox(height: 16),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0),
                 child: Container(
                   padding: EdgeInsets.all(14.0),
                   decoration: BoxDecoration(
@@ -47,7 +54,7 @@ class OnboardingScreen extends StatelessWidget {
               SizedBox(height: 28),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0),
                 child: Text(
                   "Food for\nEveryone",
                   style: GoogleSansRoundedStyles.bold(
@@ -69,36 +76,38 @@ class OnboardingScreen extends StatelessWidget {
                     Positioned(
                       right: -size.width * 0.02,
                       bottom: size.height * 0.05,
-                        child: _FadedCharacter(
-                          imagePath: 'assets/images/ToyFaces_Tansparent_BG_29.png',
-                          height: size.height * 0.35,
-                        ),  
+                      child: _FadedCharacter(
+                        imagePath:
+                            'assets/images/ToyFaces_Tansparent_BG_29.png',
+                        height: size.height * 0.35,
+                      ),
                     ),
                     Positioned(
                       left: -size.width * 0.02,
                       bottom: size.height * 0.05,
                       child: _FadedCharacter(
-                        imagePath: 'assets/images/ToyFaces_Tansparent_BG_49.png',
+                        imagePath:
+                            'assets/images/ToyFaces_Tansparent_BG_49.png',
                         height: size.height * 0.42,
                       ),
                     ),
                   ],
                 ),
               ),
+
               SizedBox(height: 20),
+
               Padding(
-                padding: const EdgeInsets.only(bottom: 40, left: 30, right: 30),
+                padding: EdgeInsets.only(bottom: 40, left: 30, right: 30),
                 child: GestureDetector(
-                  onTap: () {
-                 Get.to( () =>  AuthScreen());
-                  },
+                  onTap: _completeOnboarding,
                   child: Container(
                     width: double.infinity,
                     height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 8,
@@ -119,7 +128,7 @@ class OnboardingScreen extends StatelessWidget {
                   ),
                 ),
               ),
- SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
           ),
         ),
@@ -127,19 +136,17 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 }
+
 class _FadedCharacter extends StatelessWidget {
   final String imagePath;
   final double height;
-  final double fadeStart; 
-  final double fadeEnd;   
- 
-  const _FadedCharacter({
-    required this.imagePath,
-    required this.height,
-    this.fadeStart = 0.65, 
-    this.fadeEnd = 1.0,   
-  });
- 
+  final double fadeStart;
+  final double fadeEnd;
+
+  const _FadedCharacter({required this.imagePath, required this.height})
+    : fadeStart = 0.65,
+      fadeEnd = 1.0;
+
   @override
   Widget build(BuildContext context) {
     return ShaderMask(
@@ -148,19 +155,11 @@ class _FadedCharacter extends StatelessWidget {
         return LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: const [
-            Colors.white,
-            Colors.white,
-            Colors.transparent, 
-          ],
+          colors: [Colors.white, Colors.white, Colors.transparent],
           stops: [0.0, fadeStart, fadeEnd],
         ).createShader(bounds);
       },
-      child: Image.asset(
-        imagePath,
-        height: height,
-        fit: BoxFit.contain,
-      ),
+      child: Image.asset(imagePath, height: height, fit: BoxFit.contain),
     );
   }
 }
