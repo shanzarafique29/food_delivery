@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery/features/checkout/checkout_screen.dart';
 import 'package:food_delivery/features/controller/navcontroller.dart';
 import 'package:food_delivery/features/favoritescreen.dart';
 import 'package:food_delivery/features/historyscreen.dart';
 import 'package:food_delivery/features/homescreen.dart';
-import 'package:food_delivery/features/profilescreen.dart';
+import 'package:food_delivery/features/profile/profile_screen.dart';
 import 'package:get/get.dart';
 
 class Dashboard extends StatelessWidget {
@@ -14,11 +15,11 @@ class Dashboard extends StatelessWidget {
   static const Color activeColor = Color(0xFFFF3B1F);
   static const Color inactiveColor = Colors.grey;
 
-  final List<Widget> screens = const [
-    HomeScreen(),
-    Favoritescreen(),
-    Profilescreen(),
-    Historyscreen(),
+  final List<Widget> screens = [
+    const HomeScreen(),
+    const Favoritescreen(),
+    ProfileScreen(),
+    CheckoutDeliveryScreen(cartItems: [], totalPrice: 0.0),
   ];
 
   final List<IconData> icons = const [
@@ -30,7 +31,7 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-       final size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Obx(
