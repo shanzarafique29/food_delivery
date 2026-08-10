@@ -69,7 +69,7 @@ class OrderWidgets {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF4B3A).withOpacity(0.1),
+                  color: const Color(0xFFFF4B3A).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

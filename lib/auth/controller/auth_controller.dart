@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_delivery/onboarding/onboardingscreen.dart';
+import 'package:food_delivery/features/home/view/root_scree..dart';
 import 'package:get/get.dart';
 import 'package:food_delivery/features/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -87,7 +87,8 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isOnboardingDone', false);
 
-    Get.offAll(() => OnboardingScreen());
+    
+        Get.offAll(() => const RootScreen()); 
   }
 
   @override

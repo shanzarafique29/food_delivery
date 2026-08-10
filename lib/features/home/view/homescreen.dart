@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
+import 'package:food_delivery/features/home/controller/ZoomDrawerController.dart';
 import 'package:food_delivery/features/home/controller/home_controller.dart';
 import 'package:food_delivery/features/home/view/searchscreen.dart';
 import 'package:food_delivery/features/home/view/see_more_productscreen.dart';
@@ -21,8 +22,10 @@ class HomeScreen extends StatelessWidget {
       appBar: CustomAppBar(
         backgroundColor: Colors.grey.shade100,
         leading: IconButton(
-          icon: Icon(Icons.notes, size: 28, color: Colors.black),
-          onPressed: () {},
+          icon: const Icon(Icons.notes, size: 28, color: Colors.black),
+          onPressed: () {
+             Get.find<MainDrawerController>().toggleDrawer();
+          },
         ),
         actions: [
           IconButton(
@@ -134,7 +137,7 @@ class HomeScreen extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    Get.to(() =>  SeeMoreProductsScreen());
+                    Get.to(() => SeeMoreProductsScreen());
                   },
                   child: Text(
                     'see more',
