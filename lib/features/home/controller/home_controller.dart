@@ -6,35 +6,56 @@ class HomeController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
-  RxList<String> categories = <String>[
-    'Fast Food',
-    'Snacks',
-    'Desi foods',
-    'Burgers',
-    'Pizza',
-    'Drinks',
-    'Desserts',
-  ].obs;
-
+  RxList<String> categories = <String>[].obs;
   var selectedCategoryIndex = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
     allProducts.bindStream(
-      _firestore.collection('products').snapshots().map(
+      _firestore
+          .collection('products')
+          .snapshots(includeMetadataChanges: true)
+          .map(
             (snapshot) => snapshot.docs
                 .map((doc) => ProductModel.fromSnapshot(doc))
                 .toList(),
           ),
     );
+
+    categories.bindStream(
+      _firestore
+          .collection('categories')
+          .where('isActive', isEqualTo: true)
+          .snapshots(includeMetadataChanges: true)
+          .map(
+            (snapshot) => snapshot.docs
+                .map((doc) {
+                  final data = doc.data();
+                  return (data['name'] ?? '').toString();
+                })
+                .where((name) => name.isNotEmpty)
+                .toList(),
+          ),
+    );
+
+    ever(categories, (_) {
+      if (categories.isNotEmpty &&
+          selectedCategoryIndex.value >= categories.length) {
+        selectedCategoryIndex.value = 0;
+      }
+    });
   }
+
   List<ProductModel> get filteredProducts {
-    if (categories.isEmpty || selectedCategoryIndex.value >= categories.length) {
+    if (categories.isEmpty ||
+        selectedCategoryIndex.value >= categories.length) {
       return [];
     }
 
-    String selectedCategory = categories[selectedCategoryIndex.value].trim().toLowerCase();
+    String selectedCategory = categories[selectedCategoryIndex.value]
+        .trim()
+        .toLowerCase();
 
     return allProducts.where((product) {
       String prodCat = product.category.trim().toLowerCase();

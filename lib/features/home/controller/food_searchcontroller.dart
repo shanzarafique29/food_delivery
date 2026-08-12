@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delivery/models/productmodel.dart';
 import 'package:get/get.dart';
@@ -12,15 +14,49 @@ class FoodSearchController extends GetxController {
 
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
   RxList<ProductModel> searchResults = <ProductModel>[].obs;
-  RxList<ProductModel> suggestions = <ProductModel>[].obs; 
+  RxList<ProductModel> suggestions = <ProductModel>[].obs;
   RxList<String> searchHistory = <String>[].obs;
 
   RxBool isSearching = false.obs;
+  RxBool isOffline = false.obs;
+  RxBool isLoading = true.obs;
+
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   @override
   void onInit() {
     super.onInit();
     _initStorageAndData();
+    _checkInitialConnection();
+    _listenConnectivity();
+  }
+
+  Future<void> _checkInitialConnection() async {
+    final results = await Connectivity().checkConnectivity();
+    _updateConnectionStatus(results);
+  }
+
+  void _listenConnectivity() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
+      _updateConnectionStatus,
+    );
+  }
+
+  void _updateConnectionStatus(List<ConnectivityResult> results) {
+    if (results.contains(ConnectivityResult.none) || results.isEmpty) {
+      isOffline.value = true;
+    } else {
+      isOffline.value = false;
+    }
+  }
+
+
+  Future<void> retryConnection() async {
+    final results = await Connectivity().checkConnectivity();
+    _updateConnectionStatus(results);
+    if (!isOffline.value) {
+      fetchProducts();
+    }
   }
 
   void _initStorageAndData() {
@@ -34,11 +70,22 @@ class FoodSearchController extends GetxController {
   }
 
   void fetchProducts() {
-    _firestore.collection('products').snapshots().listen((snapshot) {
-      allProducts.value = snapshot.docs
-          .map((doc) => ProductModel.fromSnapshot(doc))
-          .toList();
-    });
+    isLoading.value = true;
+    _firestore
+        .collection('products')
+        .snapshots(includeMetadataChanges: true)
+        .listen(
+          (snapshot) {
+            allProducts.value = snapshot.docs
+                .map((doc) => ProductModel.fromSnapshot(doc))
+                .toList();
+
+            isLoading.value = false;
+          },
+          onError: (e) {
+            isLoading.value = false;
+          },
+        );
   }
 
   void loadSearchHistory() {
@@ -62,7 +109,7 @@ class FoodSearchController extends GetxController {
     }
 
     isSearching.value = true;
-    searchResults.clear(); 
+    searchResults.clear();
     String q = query.toLowerCase().trim();
 
     suggestions.value = allProducts.where((product) {
@@ -88,14 +135,16 @@ class FoodSearchController extends GetxController {
           product.description.toLowerCase().contains(q);
     }).toList();
 
-    suggestions.clear(); 
+    suggestions.clear();
     saveToHistory(query.trim());
   }
 
   void saveToHistory(String query) {
     if (query.isEmpty || _storage == null) return;
 
-    searchHistory.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
+    searchHistory.removeWhere(
+      (item) => item.toLowerCase() == query.toLowerCase(),
+    );
     searchHistory.insert(0, query);
 
     if (searchHistory.length > 10) {
@@ -119,6 +168,7 @@ class FoodSearchController extends GetxController {
 
   @override
   void onClose() {
+    _connectivitySubscription.cancel();
     searchController.dispose();
     super.onClose();
   }

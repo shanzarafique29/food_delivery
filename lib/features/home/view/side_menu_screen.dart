@@ -4,6 +4,7 @@ import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
 import 'package:food_delivery/features/orders/order_screen.dart';
+import 'package:food_delivery/features/offers/views/my_offerscreen.dart';
 import 'package:food_delivery/features/profile/profile_screen.dart';
 import 'package:get/get.dart';
 
@@ -59,7 +60,7 @@ class _SideMenuScreenState extends State<SideMenuScreen> {
                 fontWeight: FontWeight.w700,
               ),
               onTap: () {
-                // Get.to(() => OfferPromoScreen());
+                Get.to(() => MyOffersScreen());
               },
             ),
             _menuItem(
@@ -99,7 +100,7 @@ class _SideMenuScreenState extends State<SideMenuScreen> {
                         "Logged Out",
                         "You have been signed out successfully.",
                         snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: AppColor.primary.withOpacity(0.6),
+                        backgroundColor: AppColor.primary.withValues(alpha: 0.6),
                         colorText: Colors.white,
                         margin:  EdgeInsets.all(12),
                         borderRadius: 8,

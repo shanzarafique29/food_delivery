@@ -5,6 +5,7 @@ import 'package:food_delivery/features/home/controller/ZoomDrawerController.dart
 import 'package:food_delivery/features/home/controller/home_controller.dart';
 import 'package:food_delivery/features/home/view/searchscreen.dart';
 import 'package:food_delivery/features/home/view/see_more_productscreen.dart';
+import 'package:food_delivery/features/offers/controllers/my_offer_controller.dart';
 import 'package:food_delivery/widgets/product_card.dart';
 import 'package:food_delivery/widgets/customappbar.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(HomeController());
+    // Ensure MyOffersController is initialized
+    Get.put(MyOffersController());
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -24,13 +27,13 @@ class HomeScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.notes, size: 28, color: Colors.black),
           onPressed: () {
-             Get.find<MainDrawerController>().toggleDrawer();
+            Get.find<MainDrawerController>().toggleDrawer();
           },
         ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(
+            icon: const Icon(
               Icons.shopping_cart_outlined,
               size: 26,
               color: Colors.grey,
@@ -40,7 +43,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -55,17 +58,18 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: size.height * 0.02),
 
+              // Search Bar Trigger
               GestureDetector(
-                onTap: () => Get.to(() => SearchScreen()),
+                onTap: () => Get.to(() => const SearchScreen()),
                 behavior: HitTestBehavior.opaque,
                 child: AbsorbPointer(
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Color(0xFFEFEEFC),
+                      color: const Color(0xFFEFEEFC),
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(Icons.search, color: Colors.black54),
                         SizedBox(width: 10),
@@ -79,8 +83,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
+              // Categories List
               SizedBox(
                 height: 45,
                 child: Obx(() {
@@ -88,15 +93,14 @@ class HomeScreen extends StatelessWidget {
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.categories.length,
-                    physics: BouncingScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       final isSelected = activeIndex == index;
                       return GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () =>
-                            controller.selectedCategoryIndex.value = index,
+                        onTap: () => controller.selectedCategoryIndex.value = index,
                         child: Padding(
-                          padding: EdgeInsets.only(right: 28),
+                          padding: const EdgeInsets.only(right: 28),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -104,23 +108,17 @@ class HomeScreen extends StatelessWidget {
                                 controller.categories[index],
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                                  color: isSelected
-                                      ? AppColor.primary
-                                      : Colors.grey.shade400,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  color: isSelected ? AppColor.primary : Colors.grey.shade400,
                                 ),
                               ),
-                              SizedBox(height: 6),
+                              const SizedBox(height: 6),
                               AnimatedContainer(
-                                duration: Duration(milliseconds: 200),
+                                duration: const Duration(milliseconds: 200),
                                 height: 4,
                                 width: isSelected ? 40 : 0,
                                 decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColor.primary
-                                      : Colors.transparent,
+                                  color: isSelected ? AppColor.primary : Colors.transparent,
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -133,11 +131,12 @@ class HomeScreen extends StatelessWidget {
                 }),
               ),
 
+              // See More Header Button
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    Get.to(() => SeeMoreProductsScreen());
+                    Get.to(() => const SeeMoreProductsScreen());
                   },
                   child: Text(
                     'see more',
@@ -149,12 +148,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Products Horizontal List View
               SizedBox(
                 height: 280,
                 child: Obx(() {
                   final list = controller.filteredProducts;
                   if (list.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Text(
                         'No products available in this category',
                         style: TextStyle(color: Colors.grey),
@@ -163,11 +164,15 @@ class HomeScreen extends StatelessWidget {
                   }
                   return ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    physics: BouncingScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     itemCount: list.length,
-                    separatorBuilder: (_, _) => SizedBox(width: 12),
-                    itemBuilder: (context, index) =>
-                        ProductCard(product: list[index], onTap: () {}),
+                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      final product = list[index];
+                      return ProductCard(
+                        product: product,
+                      );
+                    },
                   );
                 }),
               ),
