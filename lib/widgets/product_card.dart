@@ -254,10 +254,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
+import 'package:food_delivery/features/favorite/controller/favorite_controller.dart';
 import 'package:food_delivery/features/home/view/ProductDetailScreen.dart';
 import 'package:food_delivery/features/offers/controllers/my_offer_controller.dart';
-import 'package:food_delivery/models/productmodel.dart';
 import 'package:food_delivery/models/offermodel.dart' hide ProductModel;
+import 'package:food_delivery/models/productmodel.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -266,7 +267,14 @@ class ProductCard extends StatelessWidget {
   final OfferModel? offer;
   final VoidCallback? onTap;
 
-  const ProductCard({super.key, required this.product, this.offer, this.onTap});
+  ProductCard({
+    super.key,
+    required this.product,
+    this.offer,
+    this.onTap,
+  });
+
+  final FavoriteController favoriteController = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
@@ -278,8 +286,9 @@ class ProductCard extends StatelessWidget {
           offersController.offersList.firstWhereOrNull((o) {
             final now = DateTime.now();
             if (!o.isActive) return false;
-            if (o.expiryDate != null && o.expiryDate!.isBefore(now))
+            if (o.expiryDate != null && o.expiryDate!.isBefore(now)) {
               return false;
+            }
 
             bool matchesProduct =
                 o.productId != null && o.productId == product.id;
@@ -288,6 +297,7 @@ class ProductCard extends StatelessWidget {
 
             return matchesProduct || matchesDirectOffer;
           });
+
       double originalPrice = product.price;
       double finalPrice = originalPrice;
 

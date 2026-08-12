@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/features/controller/navcontroller.dart';
+import 'package:food_delivery/features/faq/faq_screen.dart';
+import 'package:food_delivery/features/help/help_screen.dart';
 import 'package:food_delivery/features/orders/order_screen.dart';
 import 'package:food_delivery/features/profile/controller/profile_controller.dart';
 import 'package:food_delivery/features/profile/edit_profile/edit_profile_screen.dart';
 import 'package:food_delivery/features/profile/widget/profile_header.dart';
 import 'package:food_delivery/features/profile/widget/profile_menu_item.dart';
+import 'package:food_delivery/features/reviews/pending_review_screen.dart';
 import 'package:get/get.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -108,11 +111,11 @@ class ProfileScreen extends StatelessWidget {
                         },
                       ),
 
-                      ProfileMenuItem(title: 'Pending reviews', onTap: () {}),
+                      ProfileMenuItem(title: 'Pending reviews', onTap: () {Get.to(() => PendingReviewsScreen());}),
 
-                      ProfileMenuItem(title: 'Faq', onTap: () {}),
+                      ProfileMenuItem(title: 'Faq', onTap: () {Get.to(() => FaqScreen());}),
 
-                      ProfileMenuItem(title: 'Help', onTap: () {}),
+                      ProfileMenuItem(title: 'Help', onTap: () {Get.to(() => HelpScreen());}),
 
                       const SizedBox(height: 17),
 
