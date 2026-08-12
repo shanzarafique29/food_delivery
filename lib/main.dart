@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:  AuthWrapper(),
+      home:  const AuthWrapper(),
     );
   }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:food_delivery/features/checkout/checkout_screen.dart';
 import 'package:food_delivery/features/controller/navcontroller.dart';
-import 'package:food_delivery/features/favoritescreen.dart';
-import 'package:food_delivery/features/historyscreen.dart';
-import 'package:food_delivery/features/homescreen.dart';
+import 'package:food_delivery/features/favorite/favorite_screen.dart';
+import 'package:food_delivery/features/home/view/homescreen.dart';
 import 'package:food_delivery/features/profile/profile_screen.dart';
 import 'package:get/get.dart';
 
@@ -16,10 +14,10 @@ class Dashboard extends StatelessWidget {
   static const Color inactiveColor = Colors.grey;
 
   final List<Widget> screens = [
-    const HomeScreen(),
-    const Favoritescreen(),
+    HomeScreen(),
+    FavoriteScreen(),
     ProfileScreen(),
-    CheckoutDeliveryScreen(cartItems: [], totalPrice: 0.0),
+    
   ];
 
   final List<IconData> icons = const [

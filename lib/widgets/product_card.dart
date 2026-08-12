@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
 import 'package:food_delivery/models/productmodel.dart';
-
+import 'package:food_delivery/features/favorite/controller/favorite_controller.dart';
+import 'package:get/get.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback? onTap;
 
-  const ProductCard({super.key, required this.product, this.onTap});
+  ProductCard({super.key, required this.product, this.onTap});
+
+  final FavoriteController favoriteController = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +25,17 @@ class ProductCard extends StatelessWidget {
           alignment: Alignment.topCenter,
           clipBehavior: Clip.none,
           children: [
+            // ================= PRODUCT CARD =================
             Positioned(
               top: 40,
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -37,7 +44,7 @@ class ProductCard extends StatelessWidget {
                       color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 20,
                       spreadRadius: 1,
-                      offset:  Offset(0, 10),
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -55,7 +62,9 @@ class ProductCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                     SizedBox(height: 12),
+
+                    const SizedBox(height: 12),
+
                     Text(
                       'N${product.price.toStringAsFixed(2)}',
                       textAlign: TextAlign.center,
@@ -65,11 +74,14 @@ class ProductCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                     SizedBox(height: 10),
+
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
             ),
+
+            // ================= PRODUCT IMAGE =================
             Positioned(
               top: 0,
               child: Container(
@@ -81,7 +93,7 @@ class ProductCard extends StatelessWidget {
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 15,
-                      offset:  Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -95,16 +107,52 @@ class ProductCard extends StatelessWidget {
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: Colors.grey.shade100,
-                              child:  Icon(Icons.fastfood, size: 40, color: Colors.grey),
+                              child: const Icon(
+                                Icons.fastfood,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
                             );
                           },
                         )
                       : Container(
                           color: Colors.grey.shade100,
-                          child:  Icon(Icons.fastfood, size: 40, color: Colors.grey),
+                          child: const Icon(
+                            Icons.fastfood,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                         ),
                 ),
               ),
+            ),
+
+            // ================= FAVORITE BUTTON =================
+            Positioned(
+              top: 5,
+              right: 8,
+              child: Obx(() {
+                final bool isFavorite = favoriteController.isFavorite(product);
+
+                return GestureDetector(
+                  onTap: () {
+                    favoriteController.toggleFavorite(product);
+                  },
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      size: 19,
+                      color: isFavorite ? AppColor.primary : Colors.black,
+                    ),
+                  ),
+                );
+              }),
             ),
           ],
         ),

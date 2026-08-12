@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
+import 'package:food_delivery/features/Cart/cart_screen.dart';
 import 'package:food_delivery/features/home/controller/home_controller.dart';
 import 'package:food_delivery/features/home/view/searchscreen.dart';
 import 'package:food_delivery/features/home/view/see_more_productscreen.dart';
@@ -11,7 +12,6 @@ import 'package:get/get.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
   Widget build(BuildContext context) {
     final controller = Get.put(HomeController());
     final size = MediaQuery.of(context).size;
@@ -25,14 +25,16 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {},
         ),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.shopping_cart_outlined,
-              size: 26,
-              color: Colors.grey,
-            ),
+         IconButton(
+          onPressed: () {
+            Get.to(() => CartScreen());
+          },
+          icon: const Icon(
+            Icons.shopping_cart_outlined,
+            size: 26,
+            color: Colors.grey,
           ),
+        ),
         ],
       ),
       body: SafeArea(
