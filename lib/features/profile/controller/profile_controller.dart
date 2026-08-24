@@ -23,10 +23,12 @@ class ProfileController extends GetxController {
 
     if (user == null) return;
 
-    // Google account ka initial data
+    // Default values from FirebaseAuth instance
     userName = user.displayName ?? '';
     userEmail = user.email ?? '';
-    userPhone = user.phoneNumber ?? 'Phone number not added';
+    userPhone = (user.phoneNumber != null && user.phoneNumber!.isNotEmpty)
+        ? user.phoneNumber!
+        : 'Phone number not added';
 
     try {
       final doc = await _firestore
@@ -39,24 +41,23 @@ class ProfileController extends GetxController {
 
         if (data != null) {
           userName = data['name']?.toString() ?? userName;
-
           userEmail = data['email']?.toString() ?? userEmail;
 
-          userPhone = (data['phone'] != null &&
-                  data['phone'].toString().isNotEmpty)
-              ? data['phone'].toString()
-              : userPhone;
+          if (data['phone'] != null && data['phone'].toString().trim().isNotEmpty) {
+            userPhone = data['phone'].toString();
+          }
 
-          userAddress = (data['address'] != null &&
-                  data['address'].toString().isNotEmpty)
-              ? data['address'].toString()
-              : 'Address not added';
+          if (data['address'] != null && data['address'].toString().trim().isNotEmpty) {
+            userAddress = data['address'].toString();
+          } else {
+            userAddress = 'Address not added';
+          }
 
-          userProfileImage =
-              data['profileImageUrl']?.toString() ?? '';
+          userProfileImage = data['profileImageUrl']?.toString() ?? '';
         }
       }
 
+      // Rebuild GetBuilder widgets in ProfileScreen
       update();
     } catch (e) {
       print('Profile load error: $e');

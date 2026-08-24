@@ -12,26 +12,21 @@ class SeeMoreProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
-
+     final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColor.background,
       appBar: AppBar(
-        backgroundColor: Colors.grey.shade100,
+        backgroundColor: AppColor.background,
         elevation: 0,
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Get.back(),
         ),
         title: Obx(() {
-          final selectedCategory =
-              controller.categories[controller.selectedCategoryIndex.value];
+          final selectedCategory = controller.categories[controller.selectedCategoryIndex.value];
           return Text(
             selectedCategory,
-            style: GoogleSansRoundedStyles.light(
-              size: 20,
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-            )
+            style: GoogleSansRoundedStyles.light(size: 20, color: Colors.black, fontWeight: FontWeight.w700),
           );
         }),
         centerTitle: true,
@@ -40,34 +35,26 @@ class SeeMoreProductsScreen extends StatelessWidget {
         final list = controller.filteredProducts;
 
         if (list.isEmpty) {
-          return  Center(
+          return Center(
             child: Text(
               'No products available in this category',
-              style:  GoogleSansRoundedStyles.light(
-                  size: 18,
-                  color:  Colors.grey.shade600,
-                  fontWeight: FontWeight.w700,
-                ),
+              style: GoogleSansRoundedStyles.light(size: 18, color: Colors.grey.shade600, fontWeight: FontWeight.w700),
             ),
           );
         }
 
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             children: [
               Text(
                 'Found ${list.length} results',
-                style: GoogleSansRoundedStyles.light(
-                  size: 18,
-                  color: AppColor.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: GoogleSansRoundedStyles.light(size: 18, color: AppColor.primary, fontWeight: FontWeight.w700),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               MasonryGridView.count(
                 shrinkWrap: true,
-                physics:  NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 16,
@@ -77,9 +64,9 @@ class SeeMoreProductsScreen extends StatelessWidget {
                   return Padding(
                     padding: EdgeInsets.only(top: isEven ? 0 : 40),
                     child: SizedBox(
-                      height:
-                          300,
-                      child: ProductCard(product: list[index], onTap: () {}),
+                      height: 300,
+        
+                      child: ProductCard(product: list[index]),
                     ),
                   );
                 },

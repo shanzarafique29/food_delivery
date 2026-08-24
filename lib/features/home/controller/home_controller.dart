@@ -9,6 +9,8 @@ class HomeController extends GetxController {
   RxList<String> categories = <String>[].obs;
   var selectedCategoryIndex = 0.obs;
 
+  Worker? _categoriesWorker;
+
   @override
   void onInit() {
     super.onInit();
@@ -38,10 +40,9 @@ class HomeController extends GetxController {
                 .toList(),
           ),
     );
-
-    ever(categories, (_) {
-      if (categories.isNotEmpty &&
-          selectedCategoryIndex.value >= categories.length) {
+    _categoriesWorker = ever(categories, (_) {
+      if (categories.isEmpty) return;
+      if (selectedCategoryIndex.value >= categories.length) {
         selectedCategoryIndex.value = 0;
       }
     });
@@ -61,5 +62,11 @@ class HomeController extends GetxController {
       String prodCat = product.category.trim().toLowerCase();
       return prodCat == selectedCategory || prodCat.contains(selectedCategory);
     }).toList();
+  }
+
+  @override
+  void onClose() {
+    _categoriesWorker?.dispose();
+    super.onClose();
   }
 }

@@ -16,7 +16,7 @@ class ProductGridShimmer extends StatelessWidget {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: 6, // 6 Fake Loading Cards
+      itemCount: 6, 
       itemBuilder: (_, __) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -29,7 +29,6 @@ class ProductGridShimmer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image Box
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -38,31 +37,28 @@ class ProductGridShimmer extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                // Title Line
+                 SizedBox(height: 10),
                 Container(
                   height: 15,
                   width: 120,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
                   color: Colors.white,
                 ),
-                const SizedBox(height: 6),
-                // Subtitle Line
+                SizedBox(height: 6),
                 Container(
                   height: 12,
                   width: 80,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  margin:  EdgeInsets.symmetric(horizontal: 10),
                   color: Colors.white,
                 ),
-                const SizedBox(height: 10),
-                // Price Tag
+                 SizedBox(height: 10),
                 Container(
                   height: 20,
                   width: 60,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  margin:EdgeInsets.symmetric(horizontal: 10),
                   color: Colors.white,
                 ),
-                const SizedBox(height: 10),
+                 SizedBox(height: 10),
               ],
             ),
           ),

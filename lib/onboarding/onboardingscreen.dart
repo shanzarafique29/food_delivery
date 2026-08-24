@@ -43,7 +43,7 @@ class OnboardingScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'assets/images/applogo.png',
+                    'assets/images/app logo.png',
                     height: 35,
                     width: 35,
                     fit: BoxFit.contain,

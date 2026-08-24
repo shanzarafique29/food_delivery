@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_delivery/features/home/view/root_scree..dart';
+import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:get/get.dart';
 import 'package:food_delivery/features/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,26 +34,17 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       if (isLogin.value) {
-  
-        await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-  
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isOnboardingDone', true);
 
         Get.offAll(() => Dashboard());
       } else {
-        
-        final credential = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        final credential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
         await credential.user?.updateDisplayName(nameController.text.trim());
 
-        await _auth.signOut(); 
+        await _auth.signOut();
         passwordController.clear();
         isLogin.value = true;
 
@@ -65,7 +56,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-
   Future<void> resetPassword() async {
     final email = emailController.text.trim();
     if (email.isEmpty) {
@@ -79,18 +69,10 @@ class AuthController extends GetxController {
       Get.snackbar('Error', e.message ?? 'Something went wrong');
     }
   }
-
   Future<void> logout() async {
     await _auth.signOut();
-
-  
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isOnboardingDone', false);
-
-    
-        Get.offAll(() => const RootScreen()); 
+    Get.offAll(() => AuthScreen());
   }
-
   @override
   void onClose() {
     nameController.dispose();

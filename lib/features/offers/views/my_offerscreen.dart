@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/features/offers/controllers/my_offer_controller.dart';
+import 'package:food_delivery/features/offers/widgets/offer_card.dart';
 import 'package:get/get.dart';
 
 class MyOffersScreen extends StatelessWidget {
@@ -7,112 +8,50 @@ class MyOffersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyOffersController());
-
+    final controller = Get.isRegistered<MyOffersController>()
+        ? Get.find<MyOffersController>()
+        : Get.put(MyOffersController());
+      final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor:  Color(0xFFF6F6F9),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.black),
-        title: const Text(
-          "My Offers",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        leading: IconButton(
+          icon:  Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () => Get.back(),
         ),
+        title:  Text('My Offers', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: Obx(() {
-        if (controller.offersList.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Ohh snap! No offers yet",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text(
-                  "Bella doesn’t have any offers yet, please check again.",
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+        if (controller.isLoadingPromos.value) {
+          return  Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.promoError.value != null) {
+          return Center(
+            child: Padding(
+              padding:  EdgeInsets.all(24),
+              child: Text(
+                'Unable to load offers:\n${controller.promoError.value}',
+                textAlign: TextAlign.center,
+                style:  TextStyle(color: Colors.red),
+              ),
             ),
           );
         }
 
+        if (controller.promoCodesList.isEmpty) {
+          return Center(
+            child: Text('No offers available right now', style: TextStyle(color: Colors.grey)),
+          );
+        }
+
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.offersList.length,
-          itemBuilder: (context, index) {
-            final offer = controller.offersList[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if ((offer.imageUrl ?? '').isNotEmpty)
-                    ClipRRect(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.network(
-                        offer.imageUrl!,
-                        height: 150,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(height: 150, color: Colors.grey.shade200),
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(offer.title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Code: ${offer.code} | Discount: ${offer.discountPercent}%",
-                          style: const TextStyle(color: Colors.orange),
-                        ),
-                        const SizedBox(height: 4),
-                        if ((offer.description ?? '').isNotEmpty)
-                          Text(offer.description!,
-                              style: const TextStyle(color: Colors.grey)),
-                        if ((offer.termsAndConditions ?? '').isNotEmpty)
-                          Text("Terms: ${offer.termsAndConditions!}",
-                              style: const TextStyle(
-                                  color: Colors.grey, fontSize: 12)),
-                        const SizedBox(height: 6),
-                        if (offer.expiryDate != null)
-                          Text(
-                            "Expires on: ${offer.expiryDate!.toLocal().toString().split(' ')[0]}",
-                            style: const TextStyle(
-                                color: Colors.red, fontSize: 12),
-                          ),
-                        if (offer.isFeatured)
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text("Featured Offer",
-                                style: TextStyle(
-                                    color: Colors.green, fontSize: 12)),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+          padding:  EdgeInsets.all(20),
+          itemCount: controller.promoCodesList.length,
+          itemBuilder: (context, index) => OfferCard(offer: controller.promoCodesList[index]),
         );
       }),
     );

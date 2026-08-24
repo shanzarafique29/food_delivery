@@ -1,31 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
- class OfferModel {
-  final String? id;
+
+class OfferModel {
+  final String id;
   final String title;
   final String code;
   final double discountPercent;
-  final String? description;
-  final String? termsAndConditions;
-  final DateTime? expiryDate;
+  final String? productId;
+  final String? categoryId;
+  final double minOrderAmount;
+  final bool requiresCode;
   final bool isActive;
   final bool isFeatured;
-  final String? imageUrl;
-  final String? productId;
-  final String? categoryId; 
+  final String? description;
+  final String? imageUrl; 
+  final DateTime? expiryDate;
 
   OfferModel({
-    this.id,
+    required this.id,
     required this.title,
     required this.code,
     required this.discountPercent,
-    this.description,
-    this.termsAndConditions,
-    this.expiryDate,
-    this.isActive = true,
-    this.isFeatured = false,
-    this.imageUrl,
     this.productId,
     this.categoryId,
+    this.minOrderAmount = 0,
+    this.requiresCode = false,
+    required this.isActive,
+    this.isFeatured = false,
+    this.description,
+    this.imageUrl,
+    this.expiryDate,
   });
 
   factory OfferModel.fromSnapshot(DocumentSnapshot doc) {
@@ -34,31 +37,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
       id: doc.id,
       title: data['title'] ?? '',
       code: data['code'] ?? '',
-      discountPercent: (data['discountPercent'] ?? 0).toDouble(),
-      description: data['description'],
-      termsAndConditions: data['termsAndConditions'],
-      expiryDate: (data['expiryDate'] as Timestamp?)?.toDate(),
-      isActive: data['isActive'] ?? true,
-      isFeatured: data['isFeatured'] ?? false,
-      imageUrl: data['imageUrl'],
+      discountPercent: (data['discountPercent'] as num?)?.toDouble() ?? 0.0,
       productId: data['productId'],
-      categoryId: data['categoryId'], 
+      categoryId: data['categoryId'],
+      minOrderAmount: (data['minOrderAmount'] as num?)?.toDouble() ?? 0.0,
+      requiresCode: data['requiresCode'] == true,
+      isActive: data['isActive'] ?? true,
+      isFeatured: data['isFeatured'] == true,
+      description: data['description'],
+      imageUrl: data['imageUrl'],
+      expiryDate: (data['expiryDate'] is Timestamp) ? (data['expiryDate'] as Timestamp).toDate() : null,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'code': code,
-      'discountPercent': discountPercent,
-      'description': description,
-      'termsAndConditions': termsAndConditions,
-      'expiryDate': expiryDate != null ? Timestamp.fromDate(expiryDate!) : null,
-      'isActive': isActive,
-      'isFeatured': isFeatured,
-      'imageUrl': imageUrl,
-      'productId': productId,
-      'categoryId': categoryId, 
-    };
   }
 }

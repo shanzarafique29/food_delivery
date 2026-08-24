@@ -4,8 +4,8 @@ class OrderItem {
   final String productId;
   final String productName;
   final int quantity;
-  final double price; // Discounted unit price
-  final double originalPrice; // Original price before discount
+  final double price; 
+  final double originalPrice; 
   final String imageUrl;
 
   OrderItem({
@@ -47,8 +47,8 @@ class OrderModel {
   final String userPhone;
   final String userAddress;
   final double totalAmount;
-  final double discountAmount; // ✅ Applied discount amount
-  final String? appliedOfferCode; // ✅ Applied offer promo code / title
+  final double discountAmount; 
+  final String? appliedOfferCode; 
   final String deliveryOption;
   final String paymentMethod;
   final DateTime createdAt;

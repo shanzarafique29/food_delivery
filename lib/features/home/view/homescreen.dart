@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
 import 'package:food_delivery/features/home/controller/ZoomDrawerController.dart';
-import 'package:food_delivery/features/Cart/cart_screen.dart';
+import 'package:food_delivery/features/Cart/views/cart_screen.dart';
 import 'package:food_delivery/features/home/controller/home_controller.dart';
 import 'package:food_delivery/features/home/view/searchscreen.dart';
 import 'package:food_delivery/features/home/view/see_more_productscreen.dart';
@@ -14,18 +14,19 @@ import 'package:get/get.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  @override
   Widget build(BuildContext context) {
     final controller = Get.put(HomeController());
-    // Ensure MyOffersController is initialized
+
     Get.put(MyOffersController());
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColor.background,
       appBar: CustomAppBar(
-        backgroundColor: Colors.grey.shade100,
+        backgroundColor: AppColor.background,
         leading: IconButton(
-          icon: const Icon(Icons.notes, size: 28, color: Colors.black),
+          icon: Icon(Icons.notes, size: 28, color: Colors.black),
           onPressed: () {
             Get.find<MainDrawerController>().toggleDrawer();
           },
@@ -35,7 +36,7 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {
             Get.to(() => CartScreen());
           },
-          icon: const Icon(
+          icon:  Icon(
             Icons.shopping_cart_outlined,
             size: 26,
             color: Colors.grey,
@@ -49,9 +50,10 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //  ActiveOffersBanner(), 
               Text(
                 'Delicious\nfood for you',
-                style: GoogleSansRoundedStyles.thin(
+                style: GoogleSansRoundedStyles.regular(
                   size: 30,
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -60,9 +62,9 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: size.height * 0.02),
 
-              // Search Bar Trigger
+              
               GestureDetector(
-                onTap: () => Get.to(() => const SearchScreen()),
+                onTap: () => Get.to(() => SearchScreen()),
                 behavior: HitTestBehavior.opaque,
                 child: AbsorbPointer(
                   child: Container(
@@ -71,13 +73,17 @@ class HomeScreen extends StatelessWidget {
                       color: const Color(0xFFEFEEFC),
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(Icons.search, color: Colors.black54),
                         SizedBox(width: 10),
                         Text(
                           'Search',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                          style: GoogleSansRoundedStyles.light(
+                      size: 14,
+                      color: AppColor.primary,
+                      fontWeight: FontWeight.w100,
+                    ), 
                         ),
                       ],
                     ),
@@ -85,9 +91,8 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
 
-              // Categories List
               SizedBox(
                 height: 45,
                 child: Obx(() {
@@ -111,7 +116,7 @@ class HomeScreen extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                  color: isSelected ? AppColor.primary : Colors.grey.shade400,
+                                  color: isSelected ? AppColor.primary : Colors.grey.shade900,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -132,8 +137,6 @@ class HomeScreen extends StatelessWidget {
                   );
                 }),
               ),
-
-              // See More Header Button
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -142,8 +145,8 @@ class HomeScreen extends StatelessWidget {
                   },
                   child: Text(
                     'see more',
-                    style: GoogleSansRoundedStyles.thin(
-                      size: 14,
+                    style: GoogleSansRoundedStyles.medium(
+                      size: 15,
                       color: AppColor.primary,
                       fontWeight: FontWeight.w100,
                     ),
@@ -151,16 +154,19 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // Products Horizontal List View
               SizedBox(
                 height: 280,
                 child: Obx(() {
                   final list = controller.filteredProducts;
                   if (list.isEmpty) {
-                    return const Center(
+                    return  Center(
                       child: Text(
                         'No products available in this category',
-                        style: TextStyle(color: Colors.grey),
+                        style: GoogleSansRoundedStyles.thin(
+                      size: 14,
+                      color: Colors.grey.shade400,
+                      fontWeight: FontWeight.w100,
+                    ),
                       ),
                     );
                   }

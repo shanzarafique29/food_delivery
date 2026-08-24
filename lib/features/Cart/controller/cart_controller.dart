@@ -1,70 +1,257 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get/get.dart';
 import 'package:food_delivery/models/productmodel.dart';
+import 'package:get/get.dart';
 
 class CartController extends GetxController {
   final RxList<ProductModel> cartItems = <ProductModel>[].obs;
-
   final RxMap<String, int> quantities = <String, int>{}.obs;
+  final RxSet<String> selectedItemKeys = <String>{}.obs;
+
+  final RxDouble deliveryFee = 0.0.obs;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _cartSub;
+  StreamSubscription<User?>? _authSub;
+
   String _key(ProductModel product) {
-    return product.id ?? product.name;
+    if (product.id != null && product.id!.isNotEmpty) {
+      return product.id!;
+    }
+    return product.name;
   }
 
-  // ============================================================
-  // FIRESTORE CART COLLECTION
-  // users/{uid}/cart
-  // ============================================================
+  String keyFor(ProductModel product) => _key(product);
+
+  void selectOnly(String key) {
+    selectedItemKeys.value = {key};
+  }
 
   CollectionReference<Map<String, dynamic>> get _cartCollection {
     final user = _auth.currentUser;
-
     if (user == null) {
       throw Exception('User is not logged in');
     }
-
     return _firestore
         .collection('users')
         .doc(user.uid)
         .collection('cart');
   }
 
-  // ============================================================
-  // INITIAL LOAD
-  // ============================================================
-
   @override
   void onInit() {
     super.onInit();
-    loadCart();
+
+    _authSub = _auth.authStateChanges().listen((user) {
+      _cartSub?.cancel();
+      _cartSub = null;
+
+      cartItems.clear();
+      quantities.clear();
+      selectedItemKeys.clear();
+
+      if (user != null) {
+        _bindCartStream();
+      }
+    });
+
+    if (_auth.currentUser != null) {
+      _bindCartStream();
+    }
   }
 
-  // ============================================================
-  // ADD TO CART
-  // ============================================================
+  void _bindCartStream() {
+    _cartSub?.cancel();
+
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      cartItems.clear();
+      quantities.clear();
+      selectedItemKeys.clear();
+      return;
+    }
+
+    _cartSub = _cartCollection.snapshots().listen(
+      (snapshot) {
+        final List<ProductModel> loadedProducts = [];
+        final Map<String, int> loadedQuantities = {};
+        final Set<String> currentKeys = {};
+
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+
+          final ProductModel product = ProductModel(
+            id: data['productId']?.toString() ?? doc.id,
+            name: data['name']?.toString() ?? '',
+            price: _parsePrice(data['price']),
+            imageUrl: data['imageUrl']?.toString() ?? '',
+            category: data['category']?.toString() ?? '',
+            description: data['description']?.toString() ?? '',
+            offerId: data['offerId']?.toString(),
+            categoryId: data['categoryId']?.toString(),
+            deliveryInfo: data['deliveryInfo']?.toString(),
+            termsPolicy: data['termsPolicy']?.toString(),
+            isFreeDelivery: data['isFreeDelivery'] == true,
+            freeDeliveryNotice: data['freeDeliveryNotice']?.toString(),
+            deliveryFee: _parsePrice(data['deliveryFee']),
+          );
+
+          final String key = _key(product);
+
+          loadedProducts.add(product);
+
+          loadedQuantities[key] =
+              (data['quantity'] as num?)?.toInt() ?? 1;
+
+          currentKeys.add(key);
+        }
+        selectedItemKeys.removeWhere(
+          (key) => !currentKeys.contains(key),
+        );
+
+        cartItems.assignAll(loadedProducts);
+        quantities.assignAll(loadedQuantities);
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Error',
+          'Unable to fetch cart items: $error',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      },
+    );
+  }
+
+  void toggleSelection(ProductModel product) {
+    final String key = _key(product);
+
+    if (selectedItemKeys.contains(key)) {
+      selectedItemKeys.remove(key);
+    } else {
+      selectedItemKeys.add(key);
+    }
+  }
+
+  bool isSelected(ProductModel product) {
+    return selectedItemKeys.contains(_key(product));
+  }
+
+  bool get isAllSelected {
+    if (cartItems.isEmpty) {
+      return false;
+    }
+
+    return cartItems.every(
+      (product) => selectedItemKeys.contains(_key(product)),
+    );
+  }
+
+  void toggleSelectAll() {
+    if (isAllSelected) {
+      selectedItemKeys.clear();
+    } else {
+      selectedItemKeys.assignAll(
+        cartItems.map((product) => _key(product)),
+      );
+    }
+  }
+
+  double get selectedSubtotal {
+    double total = 0.0;
+
+    for (final product in cartItems) {
+      if (isSelected(product)) {
+        total += product.price * getQuantity(product);
+      }
+    }
+
+    return total;
+  }
+
+  double get selectedDeliveryFee {
+    double total = 0.0;
+
+    for (final product in cartItems) {
+      if (!isSelected(product)) {
+        continue;
+      }
+
+      if (product.isFreeDelivery == true) {
+        continue;
+      }
+
+      total += product.deliveryFee ?? 0.0;
+    }
+
+    return total;
+  }
+
+  double get finalTotal {
+    if (selectedItemKeys.isEmpty) {
+      return 0.0;
+    }
+
+    return selectedSubtotal + selectedDeliveryFee;
+  }
+
+  List<Map<String, dynamic>> get selectedCartItemsList {
+    return cartItems
+        .where((product) => isSelected(product))
+        .map((product) {
+      final int quantity = getQuantity(product);
+      final double itemPrice = product.price * quantity;
+
+      final double itemDeliveryFee =
+          product.isFreeDelivery == true
+              ? 0.0
+              : (product.deliveryFee ?? 0.0);
+
+      return {
+        'productId': product.id ?? '',
+        'id': product.id ?? '',
+        'name': product.name,
+        'price': product.price,
+        'imageUrl': product.imageUrl,
+        'category': product.category,
+        'description': product.description,
+        'offerId': product.offerId,
+        'categoryId': product.categoryId,
+        'deliveryInfo': product.deliveryInfo ?? '',
+        'termsPolicy': product.termsPolicy ?? '',
+        'isFreeDelivery': product.isFreeDelivery ?? false,
+        'freeDeliveryNotice': product.freeDeliveryNotice ?? '',
+        'deliveryFee': itemDeliveryFee,
+        'itemDeliveryFee': itemDeliveryFee,
+        'quantity': quantity,
+        'itemSubtotal': itemPrice,
+        'totalPrice': itemPrice,
+        'itemGrandTotal': itemPrice + itemDeliveryFee,
+      };
+    }).toList();
+  }
 
   Future<void> addToCart(ProductModel product) async {
     final user = _auth.currentUser;
 
     if (user == null) {
       Get.snackbar(
-        'Login required',
-        'Please login before adding items to cart',
+        'Login Required',
+        'Please login to add items to cart',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
 
-    final key = _key(product);
+    final String key = _key(product);
 
     try {
-      // Already exists
       if (quantities.containsKey(key)) {
-        final newQuantity = quantities[key]! + 1;
+        final int newQuantity = quantities[key]! + 1;
+        selectedItemKeys.add(key);
 
         quantities[key] = newQuantity;
 
@@ -72,58 +259,50 @@ class CartController extends GetxController {
           'quantity': newQuantity,
           'updatedAt': FieldValue.serverTimestamp(),
         });
-      }
-
-      // New product
-      else {
-        cartItems.add(product);
-        quantities[key] = 1;
+      } else {
+        selectedItemKeys.add(key);
 
         await _cartCollection.doc(key).set({
-          'productId': product.id,
+          'productId': product.id ?? key,
           'name': product.name,
           'price': product.price,
           'imageUrl': product.imageUrl,
           'category': product.category,
           'description': product.description,
+          'offerId': product.offerId,
+          'categoryId': product.categoryId,
+          'deliveryInfo': product.deliveryInfo ?? '',
+          'termsPolicy': product.termsPolicy ?? '',
+          'isFreeDelivery': product.isFreeDelivery ?? false,
+          'freeDeliveryNotice': product.freeDeliveryNotice ?? '',
+          'deliveryFee': product.isFreeDelivery == true
+              ? 0.0
+              : (product.deliveryFee ?? 0.0),
           'quantity': 1,
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
-
-      quantities.refresh();
-      cartItems.refresh();
-
-      Get.snackbar(
-        'Cart',
-        '${product.name} added to cart',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 1),
-      );
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Unable to add item to cart',
+        'Unable to update cart',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
 
-  // ============================================================
-  // INCREASE QUANTITY
-  // ============================================================
-
   Future<void> increaseQuantity(ProductModel product) async {
-    final key = _key(product);
+    final String key = _key(product);
 
-    if (!quantities.containsKey(key)) return;
+    if (!quantities.containsKey(key)) {
+      return;
+    }
 
     try {
-      final newQuantity = quantities[key]! + 1;
+      final int newQuantity = quantities[key]! + 1;
 
       quantities[key] = newQuantity;
-      quantities.refresh();
 
       await _cartCollection.doc(key).update({
         'quantity': newQuantity,
@@ -132,29 +311,26 @@ class CartController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Unable to update quantity',
+        'Unable to increase quantity',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
 
-  // ============================================================
-  // DECREASE QUANTITY
-  // ============================================================
-
   Future<void> decreaseQuantity(ProductModel product) async {
-    final key = _key(product);
+    final String key = _key(product);
 
-    if (!quantities.containsKey(key)) return;
+    if (!quantities.containsKey(key)) {
+      return;
+    }
 
-    final quantity = quantities[key]!;
+    final int quantity = quantities[key]!;
 
     try {
       if (quantity > 1) {
-        final newQuantity = quantity - 1;
+        final int newQuantity = quantity - 1;
 
         quantities[key] = newQuantity;
-        quantities.refresh();
 
         await _cartCollection.doc(key).update({
           'quantity': newQuantity,
@@ -166,30 +342,21 @@ class CartController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Unable to update quantity',
+        'Unable to decrease quantity',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
 
-  // ============================================================
-  // REMOVE FROM CART
-  // ============================================================
-
   Future<void> removeFromCart(ProductModel product) async {
-    final key = _key(product);
+    final String key = _key(product);
 
     try {
       await _cartCollection.doc(key).delete();
 
-      cartItems.removeWhere(
-        (item) => _key(item) == key,
-      );
-
+      cartItems.removeWhere((item) => _key(item) == key);
       quantities.remove(key);
-
-      cartItems.refresh();
-      quantities.refresh();
+      selectedItemKeys.remove(key);
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -199,119 +366,17 @@ class CartController extends GetxController {
     }
   }
 
-  // ============================================================
-  // GET QUANTITY
-  // ============================================================
-
   int getQuantity(ProductModel product) {
     return quantities[_key(product)] ?? 0;
   }
 
-  // ============================================================
-  // TOTAL PRICE
-  // ============================================================
-
-  double get totalPrice {
-    double total = 0;
-
-    for (final product in cartItems) {
-      total += product.price * getQuantity(product);
+  double getProductDeliveryFee(ProductModel product) {
+    if (product.isFreeDelivery == true) {
+      return 0.0;
     }
 
-    return total;
+    return product.deliveryFee ?? 0.0;
   }
-
-  // ============================================================
-  // LOAD CART FROM FIRESTORE
-  // ============================================================
-
-  Future<void> loadCart() async {
-    final user = _auth.currentUser;
-
-    if (user == null) {
-      cartItems.clear();
-      quantities.clear();
-      return;
-    }
-
-    try {
-      final snapshot = await _cartCollection.get();
-
-      final List<ProductModel> loadedProducts = [];
-      final Map<String, int> loadedQuantities = {};
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-
-        final product = ProductModel(
-          id: data['productId']?.toString() ?? doc.id,
-          name: data['name']?.toString() ?? '',
-          price: _parsePrice(data['price']),
-          imageUrl: data['imageUrl']?.toString() ?? '',
-          category: data['category']?.toString() ?? '',
-          description: data['description']?.toString() ?? '',
-        );
-
-        final key = _key(product);
-
-        loadedProducts.add(product);
-
-        loadedQuantities[key] =
-            (data['quantity'] as num?)?.toInt() ?? 1;
-      }
-
-      cartItems.assignAll(loadedProducts);
-      quantities.assignAll(loadedQuantities);
-
-      cartItems.refresh();
-      quantities.refresh();
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Unable to load cart',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // ============================================================
-  // CLEAR CART
-  // ============================================================
-
-  Future<void> clearCart() async {
-    final user = _auth.currentUser;
-
-    if (user == null) {
-      cartItems.clear();
-      quantities.clear();
-      return;
-    }
-
-    try {
-      final snapshot = await _cartCollection.get();
-
-      for (final doc in snapshot.docs) {
-        await doc.reference.delete();
-      }
-
-      // Memory cart bhi clear
-      cartItems.clear();
-      quantities.clear();
-
-      cartItems.refresh();
-      quantities.refresh();
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Unable to clear cart',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // ============================================================
-  // PRICE CONVERTER
-  // ============================================================
 
   double _parsePrice(dynamic value) {
     if (value is num) {
@@ -323,5 +388,12 @@ class CartController extends GetxController {
     }
 
     return 0.0;
+  }
+
+  @override
+  void onClose() {
+    _cartSub?.cancel();
+    _authSub?.cancel();
+    super.onClose();
   }
 }

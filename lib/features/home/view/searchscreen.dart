@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/const/app_colors.dart';
+import 'package:food_delivery/const/app_fonts.dart';
 import 'package:food_delivery/features/home/controller/food_searchcontroller.dart';
 import 'package:food_delivery/widgets/product_card.dart';
 import 'package:get/get.dart';
@@ -11,9 +12,9 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(FoodSearchController());
-
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColor.background,
       body: SafeArea(
         child: Obx(() {
           if (controller.isOffline.value) {
@@ -21,14 +22,18 @@ class SearchScreen extends StatelessWidget {
           }
 
           return Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     IconButton(
-                      icon:  Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 20,
+                        color: Colors.black,
+                      ),
                       onPressed: () => Get.back(),
                     ),
                     Expanded(
@@ -36,27 +41,34 @@ class SearchScreen extends StatelessWidget {
                         controller: controller.searchController,
                         autofocus: true,
                         onSubmitted: (value) => controller.performSearch(value),
-                        onChanged: (value) => controller.updateSuggestions(value),
-                        decoration:  InputDecoration(
+                        onChanged: (value) =>
+                            controller.updateSuggestions(value),
+                        decoration: InputDecoration(
                           hintText: 'Search food...',
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
                         ),
-                        style:  TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        style: GoogleSansRoundedStyles.light(
+                          size: 14,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w100,
+                        ),
                       ),
                     ),
-                    Obx(() => controller.isSearching.value
-                        ? IconButton(
-                            icon:  Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              controller.searchController.clear();
-                              controller.searchResults.clear();
-                              controller.suggestions.clear();
-                              controller.isSearching.value = false;
-                            },
-                          )
-                        :  SizedBox.shrink()),
+                    Obx(
+                      () => controller.isSearching.value
+                          ? IconButton(
+                              icon: Icon(Icons.clear, color: Colors.grey),
+                              onPressed: () {
+                                controller.searchController.clear();
+                                controller.searchResults.clear();
+                                controller.suggestions.clear();
+                                controller.isSearching.value = false;
+                              },
+                            )
+                          : SizedBox.shrink(),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -72,20 +84,30 @@ class SearchScreen extends StatelessWidget {
                     final results = controller.searchResults;
                     final history = controller.searchHistory;
 
-                    if (query.isNotEmpty && suggestions.isNotEmpty && results.isEmpty) {
+                    if (query.isNotEmpty &&
+                        suggestions.isNotEmpty &&
+                        results.isEmpty) {
                       return ListView.separated(
                         itemCount: suggestions.length,
-                        separatorBuilder: (_, __) =>  Divider(height: 1, color: Colors.black12),
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.black12),
                         itemBuilder: (context, index) {
                           final item = suggestions[index];
                           return ListTile(
-                            contentPadding:  EdgeInsets.symmetric(horizontal: 8),
-                            leading:  Icon(Icons.search, color: Colors.grey),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                            leading: Icon(Icons.search, color: Colors.grey),
                             title: Text(
                               item.name,
-                              style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            trailing:  Icon(Icons.north_west, size: 16, color: Colors.grey),
+                            trailing: Icon(
+                              Icons.north_west,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                             onTap: () {
                               controller.performSearch(item.name);
                             },
@@ -95,10 +117,14 @@ class SearchScreen extends StatelessWidget {
                     }
                     if (query.isEmpty || !isSearching) {
                       if (history.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
                             'Type to search items',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                            style: GoogleSansRoundedStyles.regular(
+                              size: 18,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w100,
+                            ),
                           ),
                         );
                       }
@@ -109,13 +135,24 @@ class SearchScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Recent Searches',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: GoogleSansRoundedStyles.regular(
+                                  size: 16,
+                                  color: AppColor.primary,
+                                  fontWeight: FontWeight.w100,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () => controller.clearHistory(),
-                                child: const Text('Clear all', style: TextStyle(color: Colors.red)),
+                                child: Text(
+                                  'Clear all',
+                                  style: GoogleSansRoundedStyles.light(
+                                    size: 16,
+                                    color: AppColor.primary,
+                                    fontWeight: FontWeight.w100,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -126,11 +163,19 @@ class SearchScreen extends StatelessWidget {
                                 final item = history[index];
                                 return ListTile(
                                   contentPadding: EdgeInsets.zero,
-                                  leading: Icon(Icons.history, color: Colors.grey),
+                                  leading: Icon(
+                                    Icons.history,
+                                    color: Colors.grey,
+                                  ),
                                   title: Text(item),
                                   trailing: IconButton(
-                                    icon:  Icon(Icons.close, size: 18, color: Colors.grey),
-                                    onPressed: () => controller.removeFromHistory(index),
+                                    icon: Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: Colors.grey,
+                                    ),
+                                    onPressed: () =>
+                                        controller.removeFromHistory(index),
                                   ),
                                   onTap: () {
                                     controller.performSearch(item);
@@ -152,40 +197,41 @@ class SearchScreen extends StatelessWidget {
                               size: 110,
                               color: Colors.grey.shade300,
                             ),
-                             SizedBox(height: 20),
-                           Text(
+                            SizedBox(height: 20),
+                            Text(
                               'Item not found',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                              style: GoogleSansRoundedStyles.medium(
+                                size: 16,
                                 color: Colors.black,
+                                fontWeight: FontWeight.w100,
                               ),
                             ),
-                             SizedBox(height: 10),
-                             Text(
+                            SizedBox(height: 10),
+                            Text(
                               'Try searching the item with\na different keyword.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.grey,
+                              style: GoogleSansRoundedStyles.thin(
+                                size: 14,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w100,
                                 height: 1.3,
                               ),
                             ),
-                             SizedBox(height: 60),
+                            SizedBox(height: 60),
                           ],
                         ),
                       );
                     }
 
-              
                     return GridView.builder(
                       padding: const EdgeInsets.only(top: 10, bottom: 20),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.5,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.5,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: results.length,
                       itemBuilder: (context, index) {
                         return ProductCard(
@@ -203,9 +249,10 @@ class SearchScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildShimmerGrid() {
     return GridView.builder(
-      padding:  EdgeInsets.only(top: 10, bottom: 20),
+      padding: EdgeInsets.only(top: 10, bottom: 20),
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -234,7 +281,7 @@ class SearchScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                 SizedBox(height: 10),
+                SizedBox(height: 10),
                 Container(
                   height: 15,
                   width: 120,
@@ -245,17 +292,17 @@ class SearchScreen extends StatelessWidget {
                 Container(
                   height: 12,
                   width: 80,
-                  margin:  EdgeInsets.symmetric(horizontal: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
                   color: Colors.white,
                 ),
-                 SizedBox(height: 10),
+                SizedBox(height: 10),
                 Container(
                   height: 20,
                   width: 60,
-                  margin:  EdgeInsets.symmetric(horizontal: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
                   color: Colors.white,
                 ),
-                 SizedBox(height: 10),
+                SizedBox(height: 10),
               ],
             ),
           ),
@@ -272,31 +319,27 @@ class SearchScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.wifi_off_rounded,
-            size: 120,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.wifi_off_rounded, size: 120, color: Colors.grey.shade400),
           SizedBox(height: 30),
           Text(
             'No internet Connection',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+            style: GoogleSansRoundedStyles.regular(
+              size: 22,
               color: Colors.black,
+              fontWeight: FontWeight.w100,
             ),
           ),
-       SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             'Your internet connection is currently\nnot available please check or try again.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              height: 1.4,
+            style: GoogleSansRoundedStyles.thin(
+              size: 14,
+              color: Colors.grey,
+              fontWeight: FontWeight.w100,
             ),
           ),
-           SizedBox(height: 40),
+          SizedBox(height: 40),
           SizedBox(
             width: double.infinity,
             height: 55,
@@ -311,12 +354,12 @@ class SearchScreen extends StatelessWidget {
               ),
               child: TextButton(
                 onPressed: () => controller.retryConnection(),
-                child: const Text(
+                child: Text(
                   'Try again',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleSansRoundedStyles.bold(
+                    size: 18,
+                    color: Colors.grey.shade900,
+                    fontWeight: FontWeight.w100,
                   ),
                 ),
               ),

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:food_delivery/const/app_colors.dart';
 import 'package:food_delivery/const/app_fonts.dart';
-import 'package:food_delivery/features/orders/order_screen.dart';
+import 'package:food_delivery/features/orders/views/order_screen.dart';
 import 'package:food_delivery/features/offers/views/my_offerscreen.dart';
-import 'package:food_delivery/features/profile/profile_screen.dart';
+import 'package:food_delivery/features/profile/views/profile_screen.dart';
+import 'package:food_delivery/features/setting/views/privacy_policy_screen.dart';
+import 'package:food_delivery/features/setting/views/security_screen.dart';
 import 'package:get/get.dart';
 
 class SideMenuScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class _SideMenuScreenState extends State<SideMenuScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
+     final size = MediaQuery.of(context).size;
     return Material(
       color: AppColor.primary,
       child: Container(
@@ -72,7 +75,7 @@ class _SideMenuScreenState extends State<SideMenuScreen> {
                 fontWeight: FontWeight.w700,
               ),
               onTap: () {
-                // Get.to(() => PrivacyPolicyScreen());
+                Get.to(() => PrivacyPolicyScreen());
               },
             ),
             _menuItem(
@@ -85,7 +88,7 @@ class _SideMenuScreenState extends State<SideMenuScreen> {
               ),
               showDivider: false,
               onTap: () {
-                // Get.to(() => SecurityScreen());
+                Get.to(() => SecurityScreen());
               },
             ),
            Spacer(),

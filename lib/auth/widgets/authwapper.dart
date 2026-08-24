@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:food_delivery/features/home/view/root_scree..dart';
+import 'package:food_delivery/features/home/view/root_screen.dart';
 import 'package:food_delivery/auth/auth_screen.dart';
 import 'package:food_delivery/onboarding/onboardingscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
